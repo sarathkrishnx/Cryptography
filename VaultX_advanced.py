@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from getpass import getpass
 
-# Setup vault folder and file paths
+
 VAULT_DIR = os.path.join(os.path.expanduser("~"), ".vault_manager")
 os.makedirs(VAULT_DIR, exist_ok=True)
 CREDS_FILE = os.path.join(VAULT_DIR, "creds.json")
@@ -80,7 +80,7 @@ def creds_view(key):
                 found = False
                 for d in data:
                     if site_name.lower() in d["site"].lower():
-                        found = True
+                        
                         nonce = bytes.fromhex(d["nonce"])
                         password = bytes.fromhex(d["password"])
                         chacha = ChaCha20Poly1305(key)
@@ -92,6 +92,7 @@ def creds_view(key):
                             password_str = decrypted_password.hex()
 
                         print(f"Username: {d['username']}\nPassword: {password_str}")
+                        found = True
                         break
                 if not found:
                     print("Credentials not found")

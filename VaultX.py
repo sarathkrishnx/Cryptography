@@ -1,17 +1,19 @@
 import json
 import os
 import sys
+import re
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from getpass import getpass
 
-def locker():
-    VAULT_DIR = os.path.join(os.path.expanduser("~"), ".vault_manager")
-    os.makedirs(VAULT_DIR, exist_ok=True)
-    CREDS_FILE = os.path.join(VAULT_DIR, "creds.json")
-    META_FILE = os.path.join(VAULT_DIR, "vault_meta.json")
 
+
+       
+       
+       
+       
+       
 
 
 def ask_cred(key):
@@ -156,6 +158,8 @@ def master_password():
   
     
     password = getpass("Create your Master Password: ").encode()
+    
+        
 
     salt_pass = os.urandom(16)
 
@@ -164,13 +168,10 @@ def master_password():
         length=32,
         salt=salt_pass,
         iterations=1200000
-    
-    )
+        )
     
     
         
-    
-    
     key = kdf.derive(password)
     
     chacha = ChaCha20Poly1305(key)
@@ -251,7 +252,7 @@ def intital_check():
     
     if os.path.exists("vault_meta.json"):
         key = user_verification()
-        locker()
+        
         if key:
             start(key)
         
