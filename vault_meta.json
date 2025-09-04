@@ -1,7 +1,0 @@
-{
-    "salt": "5810fa4d2aa9aeb5ec48fa112269cbbc",
-    "iterations": 1200000,
-    "algorithm": "SHA256",
-    "nonce": "7ea3d9c45b92d562eec258f8",
-    "ciphertext": "82d7e432546e4e3712feedc9588cd5f295b1b76df8b7e831d47a7e2ad8575d1427b3eec8eec6"
-}
