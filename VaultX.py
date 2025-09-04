@@ -9,7 +9,45 @@ from getpass import getpass
 
 
 
-       
+def password_strength(password):
+    password = password.decode()
+    if (len(password) < 8 or
+        not re.search(r'[A-Z]', password) or
+        not re.search(r'[a-z]', password) or
+        not re.search(r'[0-9]', password) or
+        not re.search(r'[@$!%*?&]', password)):
+        print("Weak password. Use at least 8 chars, upper, lower, digit, special char.")
+        master_password()
+        return False
+    return True
+    
+
+def list_creds():
+    if os.path.exists("creds.json"):
+    
+        with open ("creds.json","r",encoding="utf-8") as f :
+            
+            try:
+                data = json.load(f)
+                if not data:
+                    print("No credentials found !")
+                else:
+                    for d in data:
+                        print(f"{d['site']}")
+            
+            except Exception as e:
+                print("Error occured")
+                data=[]
+    
+    else:
+        print("No data found")
+        
+    
+    
+    
+    
+    
+    
        
        
        
@@ -159,39 +197,40 @@ def master_password():
     
     password = getpass("Create your Master Password: ").encode()
     
+    if password_strength(password): 
         
 
-    salt_pass = os.urandom(16)
+        salt_pass = os.urandom(16)
 
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt_pass,
-        iterations=1200000
-        )
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt_pass,
+            iterations=1200000
+            )
     
     
         
-    key = kdf.derive(password)
+        key = kdf.derive(password)
     
-    chacha = ChaCha20Poly1305(key)
-    nonce=os.urandom(12)
-    text = "for decryption purpose".encode()
-    ciphertext=chacha.encrypt(nonce,text,associated_data=None)
+        chacha = ChaCha20Poly1305(key)
+        nonce=os.urandom(12)
+        text = "for decryption purpose".encode()
+        ciphertext=chacha.encrypt(nonce,text,associated_data=None)
     
 
-    vault_metadata= {
-        "salt":salt_pass.hex(),
-        "iterations":1200000,
-        "algorithm":'SHA256',
-        "nonce":nonce.hex(),
-        "ciphertext":ciphertext.hex()
+        vault_metadata= {
+            "salt":salt_pass.hex(),
+            "iterations":1200000,
+            "algorithm":'SHA256',
+            "nonce":nonce.hex(),
+            "ciphertext":ciphertext.hex()
         
-    }
+        }
     
     
-    with open("vault_meta.json","w",encoding="utf-8") as f:
-        json.dump(vault_metadata,f,indent=4)
+        with open("vault_meta.json","w",encoding="utf-8") as f:
+            json.dump(vault_metadata,f,indent=4)
     
     
         
@@ -200,32 +239,35 @@ def user_verification():
     
     entered_password =getpass("Enter your Master Password: ").encode()
     
-    
-    with open("vault_meta.json","r",encoding="utf-8") as f :
-        data = json.load(f)  
-        
-    salt=bytes.fromhex(data["salt"])
-    nonce=bytes.fromhex(data["nonce"])  
-    iterations=data["iterations"]
-    ciphertext=bytes.fromhex(data["ciphertext"])
-        
-    kdf =PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=1200000
-    )
-    key=kdf.derive(entered_password) 
-    chacha = ChaCha20Poly1305(key)
     try:
+        with open("vault_meta.json","r",encoding="utf-8") as f :
+            data = json.load(f)  
         
-        decrypted = chacha.decrypt(nonce,ciphertext,associated_data=None)
-        if decrypted == b"for decryption purpose":
-            print("verification success")
-            return key
-    except Exception as e:
-        print("Verification failed ")
-        return False
+        salt=bytes.fromhex(data["salt"])
+        nonce=bytes.fromhex(data["nonce"])  
+        iterations=data["iterations"]
+        ciphertext=bytes.fromhex(data["ciphertext"])
+        
+        kdf =PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=1200000
+        )
+        key=kdf.derive(entered_password) 
+        chacha = ChaCha20Poly1305(key)
+        try:
+        
+            decrypted = chacha.decrypt(nonce,ciphertext,associated_data=None)
+            if decrypted == b"for decryption purpose":
+                print("verification success")
+                return key
+        except Exception as e:
+            print("Verification failed ")
+            return False
+        
+    except FileNotFoundError as e:
+        print("Wrong password")
         
     
  
@@ -237,14 +279,19 @@ def start(key):
     
     
   
-    response=input("Add , delete or view  ? ")
+    response=input("Add , delete , view , list  ? ")
 
     if(response.lower() == 'add'):
         ask_cred(key)
     elif response.lower() == 'view':
         creds_view(key)
+    elif response.lower() == 'list':
+        list_creds()
+    elif response.lower() == 'delete':
+        cred_delete()
     else:
-        cred_delete(key)     
+        print("Invalid choice")
+             
      
      
      
@@ -258,7 +305,7 @@ def intital_check():
         
     else:
         master_password()
-        locker()
+        
         key = user_verification()
         if key:
             start(key)

@@ -9,8 +9,40 @@ from getpass import getpass
 
 VAULT_DIR = os.path.join(os.path.expanduser("~"), ".vault_manager")
 os.makedirs(VAULT_DIR, exist_ok=True)
-CREDS_FILE = os.path.join(VAULT_DIR, "creds.json")
+CREDS_FILE = os.path.join(VAULT_DIR, "credentials.json")
 META_FILE = os.path.join(VAULT_DIR, "vault_meta.json")
+
+
+def list_creds():
+    if os.path.exists(CREDS_FILE):
+    
+        with open (CREDS_FILE,"r",encoding="utf-8") as f :
+            
+            try:
+                data = json.load(f)
+                if not data:
+                    print("No credentials found !")
+                else:
+                    for d in data:
+                        print(f"{d['site']}")
+            
+            except Exception as e:
+                print("Error occured")
+                data=[]
+    
+    else:
+        print("No data found")
+        
+    
+    
+    
+    
+    
+    
+       
+       
+       
+       
 
 def ask_cred(key):
     site = input("Enter site : ")
@@ -158,14 +190,22 @@ def user_verification():
         return False
 
 def start(key):
-    response = input("Add, delete or view? ")
+    
+    
+  
+    response=input("Add , delete , view , list  ? ")
 
-    if response.lower() == "add":
+    if(response.lower() == 'add'):
         ask_cred(key)
-    elif response.lower() == "view":
+    elif response.lower() == 'view':
         creds_view(key)
-    else:
+    elif response.lower() == 'list':
+        list_creds()
+    elif response.lower() == 'delete':
         cred_delete(key)
+    else:
+        print("Invalid choice")
+             
 
 def initial_check():
     if os.path.exists(META_FILE):
