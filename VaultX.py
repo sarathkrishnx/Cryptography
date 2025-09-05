@@ -288,7 +288,7 @@ def start(key):
     elif response.lower() == 'list':
         list_creds()
     elif response.lower() == 'delete':
-        cred_delete()
+        cred_delete(key)
     else:
         print("Invalid choice")
              
